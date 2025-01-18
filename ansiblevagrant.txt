@@ -25,11 +25,27 @@ test de la connectivité : ssh -i C:/Users/kouwo/vmvagrantlivre/.vagrant/machine
 - ensuite le depalkcer dans le dossier ssh de la Debian : mv private_key ~/.ssh/ubuntu_private_key
 - verifier : ls -l ~/.ssh/ ou  ls -l ~/.ssh/ubuntu_private_key
 - accorder les droits : chmod 600 ~/.ssh/ubuntu_private_key
+- Sur votre VM Ubuntu, vous pouvez vérifier si SSH est installé avec : sudo systemctl status ssh
 - allez au fichier d'inventaire par défaut : sudo nano /etc/ansible/hosts
 - verifier : [ubuntu]
 192.168.56.20 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/home/vagrant/.ssh/ubuntu_private_key
 
-
+vagrant@bullseye:/vagrant$ ansible   all -m ping
+127.0.0.1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+192.168.56.20 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+vagrant@bullseye:/vagrant$
 
 ----------------- vagrantfile --------------------------
 Vagrant.configure("2") do |config|
