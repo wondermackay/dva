@@ -1,0 +1,159 @@
+
+pour udocker : Vagrant.configure("2") do |config|
+  # Configuration de la machine Ubuntu avec Docker
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.network "private_network", ip: "192.168.56.10"  # IP dans le sous-réseau 192.168.56.0/24
+
+  # Provisionner Docker et Docker Compose sur Ubuntu
+  config.vm.provision "shell", inline: <<-SHELL
+    # Mise à jour et installation des prérequis
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+
+    # Ajouter la clé GPG de Docker
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+    # Ajouter le dépôt Docker pour Ubuntu Bionic (18.04)
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+
+    # Mettre à jour les dépôts et installer Docker
+    sudo apt-get update
+    sudo apt-get install -y docker-ce
+
+    # Vérification que Docker est installé
+    sudo systemctl enable docker
+    sudo systemctl start docker
+
+    # Installer Docker Compose (version stable)
+    sudo curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+
+    # Donner les permissions d'exécution à Docker Compose
+    sudo chmod +x /usr/local/bin/docker-compose
+
+    # Vérification que Docker Compose est installé
+    sudo docker-compose --version
+  SHELL
+end
+
+
+
+
+
+
+pour udebian 
+Vagrant.configure("2") do |config|
+  # Configuration de la machine Debian avec Ansible
+  config.vm.box = "debian/bullseye64"
+  config.vm.network "private_network", ip: "192.168.56.20"  # IP statique dans le sous-réseau 192.168.56.0/24
+
+  # Provisionner Ansible sur Debian
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt update
+    sudo apt install -y ansible
+  SHELL
+end
+
+pour ubuntu standart 
+Vagrant.configure("2") do |config|
+  # Configuration de la machine Ubuntu standard
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.network "private_network", ip: "192.168.56.40"  # IP statique dans le sous-réseau 192.168.56.0/24
+end
+
+pour centos 
+Vagrant.configure("2") do |config|
+  # Configuration de la machine CentOS
+  config.vm.box = "centos/8"
+  config.vm.network "private_network", ip: "192.168.56.30"  # IP statique dans le sous-réseau 192.168.56.0/24
+end
+
+
+- index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend App</title>
+</head>
+<body>
+    <h1>Bienvenue sur le Frontend de l'application</h1>
+</body>
+</html>
+
+- dock# 
+
+# Utiliser Debian comme image de base
+FROM debian:latest
+
+# Installer curl et nginx
+RUN apt-get update && apt-get install -y \
+    curl \
+    nginx \
+    && apt-get clean
+
+# Créer un utilisateur non-root pour exécuter le service
+RUN useradd -m webuser
+
+# Créer les répertoires nécessaires pour Nginx et ajuster les permissions
+RUN mkdir -p /run/nginx /var/log/nginx /var/lib/nginx && \
+    chown -R root:root /run/nginx /var/log/nginx /var/lib/nginx /var/www/html
+
+# Modifier la configuration de Nginx pour écouter sur le port 8080
+RUN sed -i 's/listen 80;/listen 8080;/g' /etc/nginx/sites-available/default
+
+# Commenter la directive 'user' dans nginx.conf pour éviter les avertissements
+RUN sed -i 's/^user/#user/' /etc/nginx/nginx.conf
+
+# Copier le fichier HTML dans le répertoire web
+COPY index.html /var/www/html/index.html
+
+# Exposer le port 8080
+EXPOSE 8080
+
+# Lancer nginx en tant qu'utilisateur root
+CMD ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx.conf"]
+ 
+
+- le compose 
+version: "3.9"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5555:8080" # Redirige le port 5555 de la machine hôte vers le port 8080 du conteneur
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db_data:
+
+
+- sudo docker-compose up -d --build
+
+- docker exec -it <web_container_id> bash
+apt-get update && apt-get install -y mysql-client
+mysql -h db -u appuser -p
+
+
+
