@@ -298,3 +298,37 @@ II partie ansible
 sudo su - edgar : alors il demandera pas de password
 sudo ls /root : cette commande marche alors edgar a le privilege de l'excuter 
 
+---------------------- new ------------------------------
+ansible-playbook -i ansible/hosts setup.yml : si le host est dans le dossier ansible.hosts ou 
+ansible-playbook setup.yml si tout est dasn le dossier par défaut etc/ansible/hosts
+contenu du fichier setup.yml : 
+---
+- name: Configuration de la VM Ubuntu
+  hosts: ubuntu
+  become: yes  # Exécution des tâches avec sudo
+  tasks:
+    - name: Installer le paquet vim
+      apt:
+        name: vim
+        state: present
+        update_cache: yes
+
+    - name: Créer un utilisateur
+      user:
+        name: nouvelutilisateur
+        state: present
+        shell: /bin/bash
+        groups: sudo
+        password: "{{ 'MotDePasseSecret' | password_hash('sha512') }}"
+
+---- fin 
+- vérifier sur ubuntu avec : getent passwd nouvelutilisateur
+nouvelutilisateur:x:1001:1001::/home/nouvelutilisateur:/bin/bash
+sudo su - nouvelutilisateur
+----- pour que le noeud managé donc ubuntu puisse etre accéder enssh : 
+---- utiliser un role poiur installer un treuc 
+- ansible-galaxy init configure_ubuntu
+
+
+
+
