@@ -9,6 +9,10 @@ www.example.com
 
 [all]
 127.0.0.1 ansible_connection=local
+[all]
+127.0.0.1 ansible_connection=local
+192.168.56.20 ansible_user=ubuntu
+
 
 - mais si l'on veut on peut créer un fichier inventaire directement dans le dossier courant et exécuter avec la commande :
  Contenu du fichier inventory :
